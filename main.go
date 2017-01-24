@@ -161,9 +161,11 @@ type VotifierMessage struct {
 	ServiceName, Username, Address, TimeStamp string
 }
 
+const desiredSize = 256 - 11 //max size of the block is 256 less 11 bytes as per docs on rsa.EncryptPKCS1v15
+
 func (msg VotifierMessage) Write(key *rsa.PublicKey, writer io.Writer) (err error) {
 	var buf bytes.Buffer
-	buf.Grow(256)
+	buf.Grow(desiredSize)
 	writePart := func(part string) error {
 		if len(part) == 0 {
 			return fmt.Errorf("invalid write component; is blank")
@@ -200,7 +202,7 @@ func (msg VotifierMessage) Write(key *rsa.PublicKey, writer io.Writer) (err erro
 		return
 	}
 
-	for buf.Len() < 245 {
+	for buf.Len() < desiredSize {
 		err = buf.WriteByte(0)
 		if err != nil {
 			return
